@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up • Nexivo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f2027, #020617 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #020617;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 24px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 14px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.7;
+      user-select: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: #22c55e;
+      color: #000;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .google-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      background: #fff;
+      color: #000;
+      margin-bottom: 16px;
+    }
+
+    .link {
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .link a {
+      color: #22c55e;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h2>Create your Nexivo account</h2>
+    <p class="subtitle">Start training smarter today</p>
+
+    <form method="POST" action="/signup">
+      <input type="email" name="email" placeholder="Email address" required>
+      <input type="tel" name="phone" placeholder="Phone number (optional)">
+
+      <div class="password-wrapper">
+        <input
+          type="password"
+          id="signupPassword"
+          name="password"
+          placeholder="Password"
+          required
+        >
+        <span
+          class="toggle-password"
+          id="signupToggleIcon"
+          onclick="toggleSignupPassword()"
+        >👁️</span>
+      </div>
+
+      <button type="submit">Create Account →</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <!-- ✅ WORKING GOOGLE SIGNUP -->
+    <a href="/login/google" class="google-btn">
+      Continue with Google
+    </a>
+
+    <div class="link">
+      Already have an account? <a href="/login">Login</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleSignupPassword() {
+      const input = document.getElementById("signupPassword");
+      const icon = document.getElementById("signupToggleIcon");
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+      } else {
+        input.type = "password";
+        icon.textContent = "👁️";
+      }
+    }
+  </script>
+
+</body>
+</html>

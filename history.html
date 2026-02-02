@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Your Activity History</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+}
+.container{
+  max-width:720px;
+  margin:auto;
+  padding:16px;
+}
+h2{text-align:center}
+.item{
+  background:#111;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+.meta{
+  font-size:12px;
+  opacity:0.7;
+  margin-top:6px;
+}
+.back{
+  text-align:center;
+  margin-top:16px;
+}
+.back a{
+  color:#22c55e;
+  text-decoration:none;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>📜 Your Activity History</h2>
+
+  {% if history %}
+    {% for h in history %}
+      <div class="item">
+        ✔ {{ h["event"].replace("_"," ").title() }}
+        {% if h["mode"] %} — <b>{{ h["mode"] }}</b>{% endif %}
+        <div class="meta">{{ h["created_at"] }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="item">No activity recorded yet.</div>
+  {% endif %}
+
+  <div class="back">
+    <a href="/dashboard">← Back to Coach</a>
+  </div>
+</div>
+</body>
+</html>

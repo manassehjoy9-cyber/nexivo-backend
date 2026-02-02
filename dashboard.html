@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Coach</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg1:#0f2027;
+  --bg2:#203a43;
+  --bg3:#2c5364;
+  --accent:#22c55e;
+  --glass:rgba(255,255,255,0.08);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter, Arial, sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  color:#fff;
+}
+
+.container{
+  max-width:780px;
+  margin:auto;
+  padding:16px;
+}
+
+.header{
+  text-align:center;
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.modes{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.modes button{
+  padding:10px 16px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  color:#052e16;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.links{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+.links a{
+  color:var(--accent);
+  text-decoration:none;
+  font-weight:600;
+  margin:0 8px;
+}
+
+.chat{
+  background:var(--glass);
+  border-radius:16px;
+  padding:12px;
+  min-height:380px;
+  max-height:55vh;
+  overflow-y:auto;
+  backdrop-filter:blur(12px);
+}
+
+.msg{
+  max-width:80%;
+  padding:12px 14px;
+  border-radius:14px;
+  margin-bottom:10px;
+  line-height:1.4;
+}
+
+.user{
+  background:#1f2937;
+  margin-left:auto;
+}
+
+.coach{
+  background:#0f172a;
+}
+
+.info{
+  max-width:100%;
+  text-align:center;
+  opacity:.8;
+  font-size:14px;
+}
+
+.modeTag{
+  font-size:11px;
+  opacity:.6;
+  margin-bottom:4px;
+}
+
+.inputBox{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+
+.inputBox input{
+  flex:1;
+  padding:14px;
+  border-radius:999px;
+  border:none;
+  font-size:15px;
+}
+
+.inputBox button{
+  padding:14px 20px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  font-weight:700;
+  cursor:pointer;
+}
+
+.status{
+  text-align:center;
+  font-size:14px;
+  margin-top:8px;
+  opacity:.85;
+}
+
+.actions{
+  text-align:center;
+  margin-top:8px;
+}
+
+.actions button{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.25);
+  color:#fff;
+  padding:6px 12px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.logout{
+  text-align:center;
+  margin-top:14px;
+}
+
+.logout a{
+  color:#9ca3af;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">🏸 Smart Coach</div>
+
+  <div class="modes">
+    <button onclick="setMode('Training')">🏋️ Training</button>
+    <button onclick="setMode('Diet')">🥗 Diet</button>
+    <button onclick="setMode('Injury')">🩺 Injury</button>
+    <button onclick="setMode('Tournament')">🏆 Tournament</button>
+    <button onclick="setMode('Ask')">💬 Ask</button>
+    {% if video_analysis_unlocked %}
+<button onclick="location.href='/video-analysis'">
+    🎥 Video Analysis
+</button>
+{% else %}
+<button disabled title="Complete your profile to unlock">
+    🔒 Video Analysis
+</button>
+{% endif %}
+  </div>
+
+  <div class="links">
+    <a href="/coach-settings">⚙️ Coach Settings</a> |
+    <a href="/history">📜 History</a>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="actions">
+    <button onclick="clearChat()">🧹 Clear chat</button>
+  </div>
+
+  <div class="inputBox">
+    <input id="text" placeholder="Enable AI from Coach Settings" disabled>
+    <button id="sendBtn" disabled onclick="send()">Send</button>
+  </div>
+
+  <div class="status" id="status">🔒 Coach locked</div>
+
+  <div class="logout">
+    <a href="/logout">🚪 Logout</a>
+  </div>
+
+</div>
+
+<script>
+let mode = "Ask";
+let aiEnabled = false;
+let chatCache = null;   // 🔐 WhatsApp-style persistence
+const chat = document.getElementById("chat");
+
+function escapeHTML(str){
+  return str.replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  })[m]);
+}
+
+function addMsg(text, role, m){
+  const d = document.createElement("div");
+  d.className = role === "info" ? "info msg" : "msg " + role;
+  d.innerHTML = m
+    ? `<div class="modeTag">${m}</div>${escapeHTML(text)}`
+    : escapeHTML(text);
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function renderChat(rows){
+  chat.innerHTML = "";
+  if(rows.length === 0){
+    addMsg("No previous messages yet. Ask your coach anything 👇", "info");
+    return;
+  }
+  rows.forEach(r=>{
+    addMsg(r.message, r.role === "user" ? "user" : "coach", r.mode);
+  });
+}
+
+function loadChatOnce(){
+  if(chatCache !== null){
+    renderChat(chatCache);
+    return;
+  }
+
+  fetch("/api/chat-history", { credentials:"same-origin" })
+    .then(r=>r.json())
+    .then(rows=>{
+      chatCache = rows;
+      renderChat(rows);
+    });
+}
+
+function setMode(m){
+  mode = m;
+  addMsg(`Mode switched to ${m}`, "info");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadChatOnce();
+
+  fetch("/api/coach-settings",{ credentials:"same-origin" })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.ai_enabled){
+        aiEnabled = true;
+        text.disabled = false;
+        sendBtn.disabled = false;
+        text.placeholder = "Ask your coach…";
+        status.innerText = "🟢 Coach active";
+      }
+    });
+});
+
+/* 🔒 Bulletproof restore — no re-fetch loops */
+window.addEventListener("pageshow", () => loadChatOnce());
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) loadChatOnce();
+});
+
+function send(){
+  const msg = text.value.trim();
+  if(!msg || !aiEnabled) return;
+
+  addMsg(msg, "user", mode);
+  text.value = "";
+
+  fetch("/api/coach",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    credentials:"same-origin",
+    body:JSON.stringify({ text:msg, mode })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    addMsg(d.reply, "coach", mode);
+    chatCache = null; // invalidate cache ONLY after new message
+  });
+}
+
+function clearChat(){
+  if(!confirm("Clear all chat messages?")) return;
+
+  fetch("/api/clear-chat",{
+    method:"POST",
+    credentials:"same-origin"
+  }).then(()=>{
+    chatCache = [];
+    renderChat([]);
+  });
+}
+</script>
+
+</body>
+</html>

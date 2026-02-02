@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Training Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .card {
+      background: #111;
+      padding: 30px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #22c55e;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>🏋️ Training Setup</h2>
+
+  <label>Training days per week</label>
+  <select id="days">
+    <option value="">Select</option>
+    <option value="1">1 day</option>
+    <option value="2">2 days</option>
+    <option value="3">3 days</option>
+    <option value="4">4 days</option>
+    <option value="5">5 days</option>
+    <option value="6">6 days</option>
+    <option value="7">7 days</option>
+  </select>
+
+  <label>Minutes per session</label>
+  <select id="minutes">
+    <option value="">Select</option>
+    <option value="30">30 minutes</option>
+    <option value="45">45 minutes</option>
+    <option value="60">60 minutes</option>
+    <option value="90">90 minutes</option>
+    <option value="120">120 minutes</option>
+  </select>
+
+  <label>Current fatigue level</label>
+  <select id="fatigue">
+    <option value="">Select</option>
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+  </select>
+
+  <button onclick="saveTraining()">Save Training</button>
+</div>
+
+<script>
+async function saveTraining() {
+  const days = document.getElementById("days").value;
+  const minutes = document.getElementById("minutes").value;
+  const fatigue = document.getElementById("fatigue").value;
+
+  if (!days || !minutes || !fatigue) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const res = await fetch("/api/training", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({
+      days: days,
+      minutes: minutes,
+      fatigue: fatigue
+    })
+  });
+
+  if (res.ok) {
+    window.location.href = "/setup";
+  } else {
+    alert("Error saving training");
+  }
+}
+</script>
+
+</body>
+</html>

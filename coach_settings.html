@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coach Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.container{
+  width:90%;
+  max-width:420px;
+  background:#0b1220;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 25px 60px rgba(0,0,0,.6);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:6px;
+}
+
+.subtitle{
+  text-align:center;
+  font-size:14px;
+  opacity:.8;
+  margin-bottom:22px;
+}
+
+/* ---------- CARDS ---------- */
+.card{
+  background:#020617;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+  cursor:pointer;
+  border:2px solid transparent;
+  transition:.25s ease;
+}
+
+.card:hover{
+  transform:scale(1.02);
+}
+
+.card.active{
+  border-color:#22c55e;
+  background:#052e16;
+}
+
+.card h3{
+  margin:0;
+  font-size:18px;
+}
+
+.card p{
+  margin:6px 0 0;
+  font-size:13px;
+  opacity:.85;
+}
+
+/* ---------- TOGGLE ---------- */
+.toggle{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:22px;
+}
+
+.switch{
+  position:relative;
+  width:52px;
+  height:28px;
+}
+
+.switch input{
+  opacity:0;
+  width:0;
+  height:0;
+}
+
+.slider{
+  position:absolute;
+  cursor:pointer;
+  inset:0;
+  background:#374151;
+  border-radius:34px;
+  transition:.3s;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  height:22px;
+  width:22px;
+  left:3px;
+  bottom:3px;
+  background:white;
+  border-radius:50%;
+  transition:.3s;
+}
+
+input:checked + .slider{
+  background:#22c55e;
+}
+
+input:checked + .slider:before{
+  transform:translateX(24px);
+}
+
+/* ---------- SAVE ---------- */
+.save{
+  margin-top:10px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  background:#22c55e;
+  color:#000;
+  cursor:pointer;
+}
+
+.save:hover{
+  background:#16a34a;
+}
+
+.back{
+  text-align:center;
+  margin-top:16px;
+}
+
+.back a{
+  color:#9ca3af;
+  text-decoration:none;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🎛️ Coach Settings</h2>
+  <div class="subtitle">Customize how your coach behaves</div>
+
+  <!-- AI TOGGLE (UI READY) -->
+  <div class="toggle">
+    <span>🤖 AI Enhanced Coach</span>
+    <label class="switch">
+      <input type="checkbox" id="aiToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- STYLE CARDS -->
+  <div class="card" data-style="calm">
+    <h3>🙂 Calm Coach</h3>
+    <p>Supportive, balanced and stress-free guidance</p>
+  </div>
+
+  <div class="card" data-style="strict">
+    <h3>😠 Strict Coach</h3>
+    <p>Discipline, accountability and no excuses</p>
+  </div>
+
+  <div class="card" data-style="motivational">
+    <h3>🔥 Motivational Coach</h3>
+    <p>High energy, confidence and push to perform</p>
+  </div>
+
+  <button class="save" onclick="saveSettings()">Save Settings</button>
+
+  <div class="back">
+    <a href="/dashboard">← Back to Coach</a>
+  </div>
+</div>
+
+<script>
+let selectedStyle = "calm";
+
+document.querySelectorAll(".card").forEach(card=>{
+  card.addEventListener("click", ()=>{
+    document.querySelectorAll(".card").forEach(c=>c.classList.remove("active"));
+    card.classList.add("active");
+    selectedStyle = card.dataset.style;
+  });
+});
+
+// Load existing settings
+fetch("/api/coach-settings", { credentials:"same-origin" })
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.style){
+      selectedStyle = data.style;
+      document.querySelector(`[data-style="${data.style}"]`)?.classList.add("active");
+    }
+    if(data.ai_enabled){
+      document.getElementById("aiToggle").checked = true;
+    }
+  });
+
+function saveSettings(){
+  fetch("/api/coach-settings", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    credentials:"same-origin",
+    body:JSON.stringify({
+      style: selectedStyle,
+      ai_enabled: document.getElementById("aiToggle").checked ? 1 : 0
+    })
+  }).then(()=>{
+    alert("Coach settings saved successfully");
+  });
+}
+</script>
+
+</body>
+</html>

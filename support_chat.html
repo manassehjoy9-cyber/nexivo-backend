@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nexivo Support Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f2027, #020617 60%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .chat-container {
+      flex: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .bot {
+      background: #020617;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .user {
+      background: #22c55e;
+      color: #000;
+      margin-left: auto;
+    }
+
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .quick-replies button {
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .quick-replies button:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .send-btn {
+      padding: 14px 20px;
+      border-radius: 14px;
+      border: none;
+      background: #22c55e;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Nexivo Support</div>
+  <a href="/support">Back to Support</a>
+</header>
+
+<div class="chat-container">
+  <div class="messages">
+    <div class="message bot">
+      👋 Hi! I’m Nexivo Support AI.  
+      I can help with login issues, account setup, and how the app works.
+    </div>
+
+    <div class="message bot">
+      Please note: I can’t provide training or sports advice.
+    </div>
+  </div>
+
+  <!-- ✅ QUICK REPLIES -->
+  <div class="quick-replies">
+    <button data-msg="login">Login</button>
+    <button data-msg="forgot password">Forgot Password</button>
+    <button data-msg="signup">Sign Up</button>
+    <button data-msg="is this free">Is this free?</button>
+    <button id="go-login">Go to Login Page</button>
+  </div>
+
+  <div class="input-area">
+    <input type="text" placeholder="Type your question about Nexivo..." />
+    <button class="send-btn">Send</button>
+  </div>
+</div>
+
+<footer>
+  © 2026 Nexivo · AI Support Assistant
+</footer>
+
+<script>
+  const input = document.querySelector("input");
+  const sendBtn = document.querySelector(".send-btn");
+  const messages = document.querySelector(".messages");
+  const quickBtns = document.querySelectorAll(".quick-replies button[data-msg]");
+  const goLoginBtn = document.getElementById("go-login");
+
+  function addMessage(text, type) {
+    const div = document.createElement("div");
+    div.className = "message " + type;
+    div.innerText = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage(text) {
+    if (!text) return;
+
+    addMessage(text, "user");
+
+    try {
+      const res = await fetch("/api/support-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      addMessage(data.reply || "No response.", "bot");
+    } catch {
+      addMessage("⚠️ Support is temporarily unavailable.", "bot");
+    }
+  }
+
+  sendBtn.addEventListener("click", () => {
+    const text = input.value.trim();
+    input.value = "";
+    sendMessage(text);
+  });
+
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
+  quickBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      sendMessage(btn.dataset.msg);
+    });
+  });
+
+  goLoginBtn.addEventListener("click", () => {
+    window.location.href = "/login";
+  });
+</script>
+
+</body>
+</html>
