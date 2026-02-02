@@ -11,8 +11,8 @@ from functools import wraps
 # ======================================================
 # EMAIL (SMTP — GMAIL)
 # ======================================================
-SMTP_EMAIL = "manassehjoy9@gmail.com"
-SMTP_PASSWORD = "mibjtyfrnlvqrutk"
+SMTP_EMAIL = os.getenv("SMTP_EMAIL")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
