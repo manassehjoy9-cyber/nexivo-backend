@@ -64,7 +64,7 @@ If you did not request this, please ignore this email.
 # APP CONFIG
 # ======================================================
 app = Flask(__name__)
-app.secret_key = "phase2-stable-secret"
+app.secret_key = os.getenv("SESSION_SECRET")
 
 app.permanent_session_lifetime = timedelta(days=30)
 
