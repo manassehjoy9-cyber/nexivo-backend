@@ -1,8 +1,7 @@
-openai>=1.12.0
 flask
 flask-cors
-werkzeug
-authlib
-requests
 gunicorn
+requests
 python-dotenv
+authlib
+openai>=1.12.0
