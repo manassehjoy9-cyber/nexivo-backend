@@ -3,3 +3,6 @@ flask
 flask-cors
 werkzeug
 authlib
+requests
+gunicorn
+python-dotenv
