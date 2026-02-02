@@ -1215,3 +1215,5 @@ def get_all_sports():
     sports = cursor.fetchall()
     conn.close()
     return sports
+if __name__ == "__main__":
+    app.run()
