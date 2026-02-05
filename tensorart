@@ -1,0 +1,149 @@
+// ==UserScript==
+// @name         Tensor.Art Force Download Button (NSFW friendly)
+// @namespace    https://greasyfork.org/users/yourname
+// @version      0.3
+// @description  Adds force-download buttons to images on tensor.art (works better on restricted/NSFW content)
+// @author       You
+// @match        https://tensor.art/*
+// @grant        GM_addStyle
+// @grant        GM_registerMenuCommand
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Simple CSS for our buttons
+    GM_addStyle(`
+        .force-dl-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: #e945ff;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            opacity: 0.92;
+            transition: all 0.15s;
+        }
+        .force-dl-btn:hover {
+            opacity: 1;
+            transform: scale(1.08);
+            background: #ff33ff;
+        }
+        .img-wrapper-force-dl {
+            position: relative;
+            display: inline-block;
+        }
+    `);
+
+    function addDownloadButton(imgContainer) {
+        // Skip if button already exists
+        if (imgContainer.querySelector('.force-dl-btn')) return;
+
+        // Try to find the actual <img> inside
+        let img = imgContainer.querySelector('img[src*="tensor.art"][src*="images"]') ||
+                  imgContainer.querySelector('img[src^="https://"]');
+
+        if (!img) return;
+
+        let src = img.src;
+
+        // Try to get highest resolution variant (common patterns on tensor.art)
+        if (src.includes('/thumbnail/') || src.includes('/small/') || src.includes('/medium/')) {
+            // attempt to upgrade url
+            src = src
+                .replace(/\/thumbnail\//, '/original/')
+                .replace(/\/small\//,    '/original/')
+                .replace(/\/medium\//,   '/original/')
+                .replace(/\/preview\//,  '/original/')
+                .replace(/\?.*$/, '');   // remove query params that downscale
+        }
+
+        // Create button
+        const btn = document.createElement('button');
+        btn.textContent = '⬇ Force DL';
+        btn.className = 'force-dl-btn';
+        btn.title = 'Download this image (bypass some restrictions)';
+
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Most reliable cross-origin friendly way in 2025/2026
+            const a = document.createElement('a');
+            a.href = src;
+            a.download = '';  // let browser suggest filename
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            // fallback if above fails due to cors / blob
+            setTimeout(() => {
+                if (!a.parentNode) {  // already removed → probably started
+                    console.log('[TensorDL] Download triggered for:', src);
+                } else {
+                    // last resort — open in new tab (user can save as)
+                    window.open(src, '_blank');
+                }
+            }, 300);
+        };
+
+        // Wrap or append button
+        if (imgContainer.style.position !== 'relative' && imgContainer.style.position !== 'absolute') {
+            imgContainer.style.position = 'relative';
+        }
+        imgContainer.appendChild(btn);
+    }
+
+    // Initial run
+    function scanAndAddButtons() {
+        // Common selectors on tensor.art (2025–2026 layouts)
+        const selectors = [
+            'div[class*="Image"] img[src*="tensor.art"]',
+            'div[class*="Preview"] img',
+            'div[class*="Card"] img',
+            'img[src*="images"][width][height]',
+            '.ant-image img',                    // sometimes uses antd
+            '[data-testid="image-container"] img',
+            '.creation-image img',
+            '.post-image img'
+        ];
+
+        selectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(img => {
+                let container = img.parentElement;
+                // go up 1–3 levels to find a good relative wrapper
+                if (container && !container.className.includes('force-dl-wrapper')) {
+                    if (!container.querySelector('.force-dl-btn')) {
+                        addDownloadButton(container);
+                    }
+                }
+            });
+        });
+    }
+
+    // Run once
+    setTimeout(scanAndAddButtons, 1200);
+
+    // MutationObserver — very important because tensor.art is a heavy SPA
+    const observer = new MutationObserver(() => {
+        scanAndAddButtons();
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Optional: manual trigger from Tampermonkey menu
+    GM_registerMenuCommand("Force Add Download Buttons Now", scanAndAddButtons);
+
+    console.log('[TensorArt Force DL] Userscript active — buttons should appear on images');
+})();
