@@ -1,0 +1,62 @@
+// ==UserScript==
+// @name         TensorArt Downloader (NSFW Supported)
+// @namespace    http://tampermonkey.net/
+// @version      1.1
+// @description  Adds download buttons to videos on TensorArt, supports NSFW and refreshing.
+// @author       Replit Agent
+// @match        https://tensor.art/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function addDownloadButtons() {
+        // Find all video elements on the page
+        const videos = document.querySelectorAll('video');
+
+        videos.forEach(video => {
+            // Check if we already added a button to this video's container
+            if (video.parentElement.querySelector('.tensor-downloader-btn')) return;
+
+            // Create button
+            const btn = document.createElement('a');
+            btn.innerText = 'Download';
+            btn.className = 'tensor-downloader-btn';
+            btn.style.position = 'absolute';
+            btn.style.top = '10px';
+            btn.style.right = '10px';
+            btn.style.zIndex = '9999';
+            btn.style.backgroundColor = '#ff4d4f';
+            btn.style.color = 'white';
+            btn.style.padding = '5px 10px';
+            btn.style.borderRadius = '4px';
+            btn.style.textDecoration = 'none';
+            btn.style.fontSize = '12px';
+            btn.style.fontWeight = 'bold';
+            btn.style.cursor = 'pointer';
+            btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+
+            // Set href to video source
+            const videoSrc = video.src || (video.querySelector('source') && video.querySelector('source').src);
+            
+            if (videoSrc) {
+                btn.href = videoSrc;
+                btn.download = 'tensor_video.mp4';
+                btn.target = '_blank';
+            } else {
+                return; // Skip if no source found
+            }
+
+            // Ensure parent container is relative so the button positions correctly
+            const parentStyle = window.getComputedStyle(video.parentElement);
+            if (parentStyle.position === 'static') {
+                video.parentElement.style.position = 'relative';
+            }
+            video.parentElement.appendChild(btn);
+        });
+    }
+
+    // Run every 2 seconds to handle dynamic content loading and page refreshes
+    setInterval(addDownloadButtons, 2000);
+})();
