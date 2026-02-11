@@ -1231,8 +1231,8 @@ def onboarding():
             conn.commit()
             conn.close()
 
-            # Go directly to dashboard after onboarding
-            return redirect(url_for("dashboard"))
+            # Go to setup after onboarding (mandatory)
+return redirect(url_for("setup"))
         except Exception:
             return render_template("onboarding.html", error="An error occurred. Please try again.")
 
