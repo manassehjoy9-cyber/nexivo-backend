@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Complete Setup • Nexivo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0b1d26, #000);
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 22px 10px 10px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    p {
+      text-align: center;
+      opacity: 0.7;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .card {
+      background: rgba(20, 30, 40, 0.95);
+      border-radius: 18px;
+      padding: 22px 10px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.7);
+    }
+
+    .icon {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .label {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      font-size: 12px;
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+
+    .completed {
+      background: #14532d;
+      color: #bbf7d0;
+    }
+
+    .required-badge {
+      font-size: 10px;
+      color: #f59e0b;
+      margin-top: 6px;
+    }
+
+    .optional-badge {
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .btn {
+      margin: 30px auto 40px;
+      display: block;
+      width: 90%;
+      max-width: 500px;
+      padding: 16px;
+      border-radius: 18px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      background: #22c55e;
+      color: #000;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn:disabled {
+      background: #374151;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .btn:not(:disabled):active {
+      transform: scale(0.98);
+    }
+
+    .btn-hint {
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: -20px;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🛠️ Complete Your Setup</h1>
+<p>Finish these to unlock your personal AI coach</p>
+
+<div class="grid">
+
+  <div class="card" id="card-training" onclick="go('/training')">
+    <div class="icon">🏋️</div>
+    <div class="label">Training</div>
+    <div class="status" id="status-training">Not set</div>
+    <div class="required-badge">⚡ Required</div>
+  </div>
+
+  <div class="card" id="card-diet" onclick="go('/diet')">
+    <div class="icon">🥗</div>
+    <div class="label">Diet</div>
+    <div class="status" id="status-diet">Not set</div>
+    <div class="required-badge">⚡ Required</div>
+  </div>
+
+  <div class="card" id="card-injury" onclick="go('/injury')">
+    <div class="icon">🩺</div>
+    <div class="label">Injury</div>
+    <div class="status" id="status-injury">Not set</div>
+    <div class="optional-badge">Optional</div>
+  </div>
+
+  <div class="card" id="card-tournament" onclick="go('/tournament')">
+    <div class="icon">🏆</div>
+    <div class="label">Tournament</div>
+    <div class="status" id="status-tournament">Not set</div>
+    <div class="optional-badge">Optional</div>
+  </div>
+
+</div>
+
+<button class="btn" id="continueBtn" disabled onclick="go('/dashboard')">
+  Continue to Coach →
+</button>
+<div class="btn-hint" id="btnHint">Complete Training & Diet to continue</div>
+
+<script>
+  function go(url) {
+    window.location.href = url;
+  }
+
+  // Fetch setup status and update UI
+  function checkSetupStatus() {
+    fetch("/api/setup-status", { credentials: "same-origin" })
+      .then(r => {
+        if (!r.ok) throw new Error("Not authenticated");
+        return r.json();
+      })
+      .then(data => {
+        // Update Training status
+        const trainingStatus = document.getElementById("status-training");
+        if (data.training) {
+          trainingStatus.textContent = "✓ Set";
+          trainingStatus.classList.add("completed");
+        } else {
+          trainingStatus.textContent = "Not set";
+          trainingStatus.classList.remove("completed");
+        }
+
+        // Update Diet status
+        const dietStatus = document.getElementById("status-diet");
+        if (data.diet) {
+          dietStatus.textContent = "✓ Set";
+          dietStatus.classList.add("completed");
+        } else {
+          dietStatus.textContent = "Not set";
+          dietStatus.classList.remove("completed");
+        }
+
+        // Update Injury status
+        const injuryStatus = document.getElementById("status-injury");
+        if (data.injury) {
+          injuryStatus.textContent = "✓ Set";
+          injuryStatus.classList.add("completed");
+        } else {
+          injuryStatus.textContent = "Not set";
+          injuryStatus.classList.remove("completed");
+        }
+
+        // Update Tournament status
+        const tournamentStatus = document.getElementById("status-tournament");
+        if (data.tournament) {
+          tournamentStatus.textContent = "✓ Set";
+          tournamentStatus.classList.add("completed");
+        } else {
+          tournamentStatus.textContent = "Not set";
+          tournamentStatus.classList.remove("completed");
+        }
+
+        // Enable button only if BOTH training AND diet are completed
+        const continueBtn = document.getElementById("continueBtn");
+        const btnHint = document.getElementById("btnHint");
+        
+        if (data.training && data.diet) {
+          continueBtn.disabled = false;
+          btnHint.textContent = "You're ready to start!";
+          btnHint.style.color = "#22c55e";
+        } else {
+          continueBtn.disabled = true;
+          const missing = [];
+          if (!data.training) missing.push("Training");
+          if (!data.diet) missing.push("Diet");
+          btnHint.textContent = `Complete ${missing.join(" & ")} to continue`;
+          btnHint.style.color = "#9ca3af";
+        }
+      })
+      .catch(err => {
+        console.warn("Setup status check failed:", err);
+        // On error, keep button disabled for safety
+      });
+  }
+
+  // Check status on page load
+  document.addEventListener("DOMContentLoaded", checkSetupStatus);
+  
+  // Re-check when returning to page
+  window.addEventListener("pageshow", checkSetupStatus);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) checkSetupStatus();
+  });
+</script>
+
+</body>
+</html>
