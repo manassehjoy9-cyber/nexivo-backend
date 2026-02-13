@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fetch("/api/coach-settings",{ credentials:"same-origin" })
     .then(r=>r.json())
     .then(d=>{
-      if(d.ai_enabled){
+      if(parseInt(d.ai_enabled) === 1){
         aiEnabled = true;
         text.disabled = false;
         sendBtn.disabled = false;
