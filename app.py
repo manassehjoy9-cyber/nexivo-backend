@@ -2008,6 +2008,10 @@ def history_page():
 # ======================================================
 # COACH SETTINGS (PROTECTED - ONBOARDING REQUIRED)
 # ======================================================
+@app.route("/coach-settings")
+@setup_required
+def coach_settings_page():
+    return render_template("coach_settings.html")
 @app.route("/api/coach-settings", methods=["GET", "POST"])
 def coach_settings_api():
     uid = session.get("user_id")
