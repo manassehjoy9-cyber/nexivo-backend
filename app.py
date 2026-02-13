@@ -2023,13 +2023,26 @@ def coach_settings_api():
         conn = get_db()
 
         if request.method == "POST":
-            data = request.get_json()
-            conn.execute(
-                "INSERT OR REPLACE INTO coach_settings VALUES (?, ?, ?, ?)",
-                (uid, data.get("ai_enabled", 0), data.get("style", "calm"), data.get("reply_length", "short")))
-            conn.commit()
-            conn.close()
-            return jsonify(success=True)
+    data = request.get_json()
+
+    # Get existing settings first
+    existing = conn.execute(
+        "SELECT ai_enabled, style, reply_length FROM coach_settings WHERE user_id=?",
+        (uid,)
+    ).fetchone()
+
+    ai_enabled = data.get("ai_enabled", existing["ai_enabled"] if existing else 0)
+    style = data.get("style", existing["style"] if existing else "calm")
+    reply_length = data.get("reply_length", existing["reply_length"] if existing else "short")
+
+    conn.execute("""
+        INSERT OR REPLACE INTO coach_settings (user_id, ai_enabled, style, reply_length)
+        VALUES (?, ?, ?, ?)
+    """, (uid, ai_enabled, style, reply_length))
+
+    conn.commit()
+    conn.close()
+    return jsonify(success=True)
 
         row = conn.execute(
             "SELECT ai_enabled, style, reply_length FROM coach_settings WHERE user_id=?",
