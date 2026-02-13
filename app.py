@@ -2008,11 +2008,6 @@ def history_page():
 # ======================================================
 # COACH SETTINGS (PROTECTED - ONBOARDING REQUIRED)
 # ======================================================
-@app.route("/coach-settings")
-@setup_required
-def coach_settings_page():
-    return render_template("coach_settings.html")
-
 @app.route("/api/coach-settings", methods=["GET", "POST"])
 def coach_settings_api():
     uid = session.get("user_id")
@@ -2023,30 +2018,32 @@ def coach_settings_api():
         conn = get_db()
 
         if request.method == "POST":
-    data = request.get_json()
+            data = request.get_json()
 
-    # Get existing settings first
-    existing = conn.execute(
-        "SELECT ai_enabled, style, reply_length FROM coach_settings WHERE user_id=?",
-        (uid,)
-    ).fetchone()
+            existing = conn.execute(
+                "SELECT ai_enabled, style, reply_length FROM coach_settings WHERE user_id=?",
+                (uid,)
+            ).fetchone()
 
-    ai_enabled = data.get("ai_enabled", existing["ai_enabled"] if existing else 0)
-    style = data.get("style", existing["style"] if existing else "calm")
-    reply_length = data.get("reply_length", existing["reply_length"] if existing else "short")
+            ai_enabled = data.get("ai_enabled", existing["ai_enabled"] if existing else 0)
+            style = data.get("style", existing["style"] if existing else "calm")
+            reply_length = data.get("reply_length", existing["reply_length"] if existing else "short")
 
-    conn.execute("""
-        INSERT OR REPLACE INTO coach_settings (user_id, ai_enabled, style, reply_length)
-        VALUES (?, ?, ?, ?)
-    """, (uid, ai_enabled, style, reply_length))
+            conn.execute("""
+                INSERT OR REPLACE INTO coach_settings
+                (user_id, ai_enabled, style, reply_length)
+                VALUES (?, ?, ?, ?)
+            """, (uid, ai_enabled, style, reply_length))
 
-    conn.commit()
-    conn.close()
-    return jsonify(success=True)
+            conn.commit()
+            conn.close()
+            return jsonify(success=True)
 
         row = conn.execute(
             "SELECT ai_enabled, style, reply_length FROM coach_settings WHERE user_id=?",
-            (uid,)).fetchone()
+            (uid,)
+        ).fetchone()
+
         conn.close()
 
         if row:
@@ -2055,8 +2052,15 @@ def coach_settings_api():
                 "style": row["style"],
                 "reply_length": row["reply_length"],
             })
-        return jsonify({"ai_enabled": 0, "style": "calm", "reply_length": "short"})
-    except Exception:
+
+        return jsonify({
+            "ai_enabled": 0,
+            "style": "calm",
+            "reply_length": "short"
+        })
+
+    except Exception as e:
+        print("Coach settings error:", e)
         return jsonify({}), 500
 
 # ======================================================
