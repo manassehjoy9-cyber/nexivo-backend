@@ -405,7 +405,7 @@ function loadChat(force = false){
   isLoadingChat = true;
   
   // Always fetch from /api/chat-history
-  fetch("/api/chat-history", { credentials:"same-origin" })
+  fetch("/api/chat/history", { credentials:"same-origin" })
     .then(r => {
       if(!r.ok) throw new Error("Fetch failed");
       return r.json();
