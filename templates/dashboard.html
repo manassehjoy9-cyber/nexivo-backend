@@ -394,11 +394,7 @@ function renderChat(rows){
   chatRendered = true;
   
   // Always scroll to bottom after rendering
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-        chat.scrollTop = chat.scrollHeight;
-    }, 0);
-});
+  chat.scrollTop = chat.scrollHeight;
 
 // 🔐 TRUE WHATSAPP-LEVEL CHAT PERSISTENCE
 function loadChat(force = false){
